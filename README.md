@@ -2,7 +2,7 @@ __Encrypted URL Notification System__
 
 __Overview__
 
-This project is a secure form submission system that generates a one-time encrypted URL upon user submission and sends it to the admin via SMS using Twilio. It ensures secure communication between users and admins while maintaining data confidentiality.
+This project is a secure form submission system that generates a one-time encrypted URL upon user submission and sends it to the admin via SMS using Twilio. The encrypted URL leads to a web-based software platform for continuous communication between users and admins. This ensures secure and seamless interaction while maintaining data confidentiality.
 
 __Features__
 
@@ -12,9 +12,11 @@ __Features__
 
     iii. SMS notification to the admin using Twilio
 
-    iv. Scalable and globally accessible solution
+    iv. Web-based communication platform for continuous interaction
 
-    v. Django-powered backend
+    v. Scalable and globally accessible solution
+
+    vi. Django-powered backend
 
 __Technologies Used__
 
@@ -78,6 +80,8 @@ __Usage__
     iii. The admin receives an SMS with the secure link via Twilio.
 
     iv. The link is valid for a single use and ensures confidentiality.
+
+    v. The encrypted URL leads to a web-based software for continuous communication.
     
 __License__
 
