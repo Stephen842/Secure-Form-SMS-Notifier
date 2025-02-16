@@ -1,8 +1,24 @@
-__Encrypted URL Notification System__
+__Secure Encrypted Messaging Platform__
 
-__Overview__
+This project is a secure and dynamic messaging system designed for confidential communication between users and administrators.
 
-This project is a secure form submission system that generates a one-time encrypted URL upon user submission and sends it to the admin via SMS (Twilio) and Email. The encrypted URL leads to a web-based software platform for continuous communication between users and admins. This ensures secure and seamless interaction while maintaining data confidentiality.
+It ensures that messages are securely transmitted through one-time encrypted URLs, preventing unauthorized access while maintaining seamless interaction.
+
+__Core Features:__
+
+    i. User Form Submission: Users fill out and submit a health-related form containing personal and medical details.
+
+    ii. Automated Notifications: Upon submission, the system generates a one-time encrypted URL and sends it to the admin via SMS and email for immediate access.
+
+    iii. Admin Dashboard: The encrypted URL directs the admin to a secure dashboard where they can view and manage all user messages.
+
+    iv. Reply System: The admin can reply to user messages from the dashboard. Once a reply is sent, the system generates another one-time encrypted URL and sends it to the user via SMS and email.
+
+    v. User Response: Users can also reply to admin messages through their own secure messaging interface, ensuring a continuous and secure conversation.
+
+    vi. Expiration Mechanism: Each encrypted URL expires after three access attempts, enhancing security and preventing unauthorized access.
+
+    vii. Frontend & UI: The platform is styled with HTML and TailwindCSS for a modern, responsive, and user-friendly interface.
 
 __Features__
 
