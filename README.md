@@ -2,7 +2,7 @@ __Encrypted URL Notification System__
 
 __Overview__
 
-This project is a secure form submission system that generates a one-time encrypted URL upon user submission and sends it to the admin via SMS using Twilio. The encrypted URL leads to a web-based software platform for continuous communication between users and admins. This ensures secure and seamless interaction while maintaining data confidentiality.
+This project is a secure form submission system that generates a one-time encrypted URL upon user submission and sends it to the admin via SMS (Twilio) and Email. The encrypted URL leads to a web-based software platform for continuous communication between users and admins. This ensures secure and seamless interaction while maintaining data confidentiality.
 
 __Features__
 
@@ -12,11 +12,13 @@ __Features__
 
     iii. SMS notification to the admin using Twilio
 
-    iv. Web-based communication platform for continuous interaction
+    iv. Email notification to the admin
 
-    v. Scalable and globally accessible solution
+    v. Web-based communication platform for continuous interaction
 
-    vi. Django-powered backend
+    vi. Scalable and globally accessible solution
+
+    vii. Django-powered backend
 
 __Technologies Used__
 
@@ -26,9 +28,11 @@ __Technologies Used__
 
     iii. SMS Service: Twilio API
 
-    iv. Database: SQLite (for development)
+    iv. Email Service: Django Email Backend (SMTP / Gmail)
 
-    v. Security: URL encryption for secure link transmission
+    v. Database: SQLite (for development)
+
+    vi. Security: URL encryption for secure link transmission
 
 
 __Installation & Setup__
@@ -62,6 +66,22 @@ __Installation & Setup__
             ADMIN_PHONE_NUMBER=admin_phone_number
 
             SECRET_KEY=your_django_secret_key
+
+            Email Configuration
+            
+            EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
+            
+            EMAIL_HOST=smtp.gmail.com
+            
+            EMAIL_PORT=587
+            
+            EMAIL_USE_TLS=True
+            
+            EMAIL_HOST_USER=your_email@example.com
+            
+            EMAIL_HOST_PASSWORD=your_email_password
+            
+            ADMIN_EMAIL=admin@example.com
     
     5. Apply migrations & run the server
 
@@ -77,7 +97,11 @@ __Usage__
 
     ii. The system generates a one-time encrypted URL.
 
-    iii. The admin receives an SMS with the secure link via Twilio.
+    iii.The admin receives:
+
+        a. An SMS with the secure link via Twilio
+
+        b. An Email with the encrypted URL
 
     iv. The link is valid for a single use and ensures confidentiality.
 
