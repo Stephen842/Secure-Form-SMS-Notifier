@@ -25,4 +25,4 @@ urlpatterns = [
 ]
 
 #This is a flag for handling 404(Page not found) errors
-handler404 = 'Core.views.error_404'
+#handler404 = 'Core.views.error_404'
