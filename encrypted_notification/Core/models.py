@@ -23,7 +23,7 @@ class Health(models.Model):
         ('waves', 'Comes in Waves'),
     ]
 
-    name = EncryptedTextField(max_length=50)
+    name = models.CharField(max_length=50)
     email = models.EmailField()
     phone = PhoneNumberField(region='US')     
     symptom = models.TextField()
@@ -40,14 +40,14 @@ class Health(models.Model):
 
     # Fields for encrypted URL
     encrypted_url = models.CharField(max_length=255, blank=True, null=True)
-    access_attempts = models.IntegerField(default=3)
+    access_attempts = models.IntegerField(default=20, blank=True, null=True)
 
     def generate_encrypted_url(self):
         # To generate a unique encrypted url
         unique_token = get_random_string(32)
         encrypted_token = cipher_suite.encrypt(unique_token.encode()).decode()
         self.encrypted_url = encrypted_token
-        self.access_attempts = 3
+        self.access_attempts = 20
         self.save()
         return encrypted_token 
     
@@ -68,6 +68,7 @@ class Reply(models.Model):
     # Model for storing messages between admin and users.
     health = models.ForeignKey(Health, on_delete=models.CASCADE, related_name='replies')
     message = models.TextField()
+    file = models.FileField(upload_to='uploads/', null=True, blank=True)  # File upload support
     sender_type = models.CharField(
         max_length=50,
         choices=[('admin', 'Admin'), ('user', 'User')],
@@ -76,14 +77,14 @@ class Reply(models.Model):
     parent_reply = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='replies')
     created_at = models.DateTimeField(auto_now_add=True)
     encrypted_reply_url = models.CharField(max_length=255, blank=True, null=True)
-    reply_attempts = models.IntegerField(default=3)
+    reply_attempts = models.IntegerField(default=20)
 
     def generate_encrypted_reply_url(self):
         # To generate a unique encrypted url for the reply
         unique_token = get_random_string(32)
         encrypted_token = cipher_suite.encrypt(unique_token.encode()).decode()
         self.encrypted_reply_url = encrypted_token
-        self.reply_attempts = 3
+        self.reply_attempts = 20
         self.save()
         return encrypted_token
     

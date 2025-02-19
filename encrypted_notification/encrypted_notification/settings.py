@@ -141,6 +141,9 @@ STORAGES = {
     },
 }
 
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
@@ -159,6 +162,7 @@ DEFAULT_FROM_EMAIL = os.getenv('EMAIL_HOST_USER')
 TWILIO_ACCOUNT_SID=os.getenv('TWILIO_ACCOUNT_SID')
 TWILIO_AUTH_TOKEN=os.getenv('TWILIO_AUTH_TOKEN')
 TWILIO_PHONE_NUMBER=os.getenv('TWILIO_PHONE_NUMBER')
+MESSAGING_SERVICE_SID=os.getenv('MESSAGING_SERVICE_SID')
 ADMIN_PHONE_NUMBER=os.getenv('ADMIN_PHONE_NUMBER')
 
 FIELD_ENCRYPTION_KEY = os.getenv('FIELD_ENCRYPTION_KEY')

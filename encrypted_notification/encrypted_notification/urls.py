@@ -16,6 +16,8 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.conf import settings
+from django.conf.urls.static import static
 from django.conf.urls import handler404
 
 urlpatterns = [
@@ -23,6 +25,9 @@ urlpatterns = [
     path('', include('Core.urls')),
     path("__reload__/", include("django_browser_reload.urls")),
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 #This is a flag for handling 404(Page not found) errors
 #handler404 = 'Core.views.error_404'

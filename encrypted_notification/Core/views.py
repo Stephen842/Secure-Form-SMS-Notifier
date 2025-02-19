@@ -14,12 +14,18 @@ from .forms import HealthForm, AdminReplyForm, UserReplyForm
 TWILIO_SID = settings.TWILIO_ACCOUNT_SID
 TWILIO_AUTH_TOKEN = settings.TWILIO_AUTH_TOKEN
 TWILIO_PHONE_NUMBER = settings.TWILIO_PHONE_NUMBER
+MESSAGING_SERVICE_SID = settings.MESSAGING_SERVICE_SID
 ADMIN_PHONE_NUMBER = settings.ADMIN_PHONE_NUMBER
 
 # Function to send SMS
 def send_sms(to, message):
     client = Client(TWILIO_SID, TWILIO_AUTH_TOKEN)
-    client.messages.create(body=message, from_=TWILIO_PHONE_NUMBER, to=to)
+    client.messages.create(
+        messaging_service_sid=MESSAGING_SERVICE_SID,
+        body=message,
+        from_=TWILIO_PHONE_NUMBER,
+        to=to,
+    )
 
 # Function to handle form submission and to send encrypted URL via SMS and Email
 def health_form(request):
@@ -30,13 +36,13 @@ def health_form(request):
         url = request.build_absolute_uri(reverse('dashboard', args=[encrypted_url]))
 
         # Send SMS to Admin
-        sms_body = (
-            "New Health Form Submitted\n\n"
-            "A user has submitted a health inquiry. Please review and respond.\n\n"
-            f"🔗 Dashboard: {url}\n\n"
-            "Medix - Secure Medical Platform"
-        )
-        send_sms(ADMIN_PHONE_NUMBER, sms_body)
+        #sms_body = (
+        #    "New Health Form Submitted\n\n"
+        #    "A user has submitted a health inquiry. Please review and respond.\n\n"
+        #    f"🔗 Dashboard: {url}\n\n"
+        #    "Medix - Secure Medical Platform"
+        #)
+        #send_sms(ADMIN_PHONE_NUMBER, sms_body)
 
         # Send Email to Admin
         send_mail(
@@ -55,7 +61,7 @@ def health_form(request):
             Medix Team  
             """,
             from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=settings.EMAIL_HOST_USER,
+            recipient_list=[settings.EMAIL_HOST_USER],
             fail_silently=False,
         )
 
@@ -78,7 +84,7 @@ def dashboard(request, token):
     health_instance.access_attempts -= 1
     health_instance.save()
 
-    form = AdminReplyForm(request.POST or None)
+    form = AdminReplyForm(request.POST or None, request.FILES or None)  # Handle file uploads)
     if request.method == 'POST' and form.is_valid():
         reply = form.save(commit=False)
         reply.health = health_instance
@@ -89,14 +95,14 @@ def dashboard(request, token):
         reply_url = request.build_absolute_uri(reverse('messages', args=[reply.encrypted_reply_url]))
 
         # Send SMS
-        sms_body = (
-            "Important Update on Your Medical Inquiry\n\n"
-            "Our team has responded to your submission.\n"
-            "Click the link below to securely view the response:\n\n"
-            f"🔗 {reply_url}\n\n"
-            "This message is securely sent from Medix."
-        )
-        send_sms(health_instance.phone, sms_body)
+        #sms_body = (
+        #    "Important Update on Your Medical Inquiry\n\n"
+        #    "Our team has responded to your submission.\n"
+        #    "Click the link below to securely view the response:\n\n"
+        #    f"🔗 {reply_url}\n\n"
+        #    "This message is securely sent from Medix."
+        #)
+        #send_sms(health_instance.phone, sms_body)
 
         # Send Email
         send_mail(
@@ -136,13 +142,15 @@ def dashboard(request, token):
 # This function allows user to view and reply admin messages via the encrypted URL.
 def message_view(request, token):
     reply = get_object_or_404(Reply, encrypted_reply_url=token)
+    health_instance = reply.health # To get the related health form
+
 
     if reply.reply_attempts <= 0:
         return redirect('invalid_token_url') # Invalid token handling
     reply.reply_attempts -= 1
     reply.save()
 
-    form = UserReplyForm(request.POST or None)
+    form = UserReplyForm(request.POST or None, request.FILES or None)  # Handle file uploads
     if request.method == 'POST' and form.is_valid():
         user_reply = form.save(commit=False)
         user_reply.health = reply.health
@@ -155,22 +163,21 @@ def message_view(request, token):
         admin_reply_url = request.build_absolute_uri(reverse('dashboard', args=[reply.health.encrypted_url]))
 
         # Send SMS
-        sms_body = (
-            "Hello Dr\n\n"
-            "User Replied to Your Message\n\n"
-            "A user has responded to your health-related message.\n"
-            "Click below to review:\n\n"
-            f"🔗 {admin_reply_url}\n\n"
-            "Medix - Secure Medical Platform"
-        )
-        send_sms(ADMIN_PHONE_NUMBER, sms_body)
+        #sms_body = (
+        #    "Hello Dr\n\n"
+        #    "User Replied to Your Message\n\n"
+        #    "Click below to review:\n\n"
+        #    f"🔗 {admin_reply_url}\n\n"
+        #    "Medix - Secure Medical Platform"
+        #)
+        #send_sms(ADMIN_PHONE_NUMBER, sms_body)
 
         # Send Email
         send_mail(
             subject='User Responded to Your Message',
             message=f"""Hello Dr,
 
-            A user has replied to your message regarding their health inquiry.
+            A user has replied to your message.
 
             To review the response and provide further assistance, please click the link below:  
 
@@ -182,14 +189,18 @@ def message_view(request, token):
             Medix Team
             """,
             from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=settings.EMAIL_HOST_USER,
+            recipient_list=[settings.EMAIL_HOST_USER],
         )
 
         messages.success(request, 'Reply sent successfully!')
 
+    # Ensure messages are retrieved **only once** and in correct order
+    chat_history = Reply.objects.filter(health=reply.health).order_by('created_at')
+
     context={
         'reply': reply,
         'form': form,
+        'chat_history': chat_history,
         'title': 'Medix Direct Messaging: Connect with Our Experts'
     }
 
@@ -206,3 +217,4 @@ def expired_view(request):
         'title': 'Your Access Link Has Expired',   
     }
     return render(request, 'pages/expired.html', context)
+

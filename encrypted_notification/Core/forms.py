@@ -9,9 +9,9 @@ class HealthForm(forms.ModelForm):
 class AdminReplyForm(forms.ModelForm):
     class Meta:
         model = Reply
-        fields = ['message']
+        fields = ['message', 'file']
 
 class UserReplyForm(forms.ModelForm):
     class Meta:
         model = Reply
-        fields = ['message']
+        fields = ['message', 'file']

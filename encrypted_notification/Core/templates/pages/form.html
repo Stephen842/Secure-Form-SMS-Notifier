@@ -1,0 +1,167 @@
+{% load static %}
+{% load widget_tweaks %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset='utf-8'>
+        <meta http-equiv = 'X-UA-Compatible' content = 'IE=edge'>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv='content-type' content='text/html; charset = utf-8'/>
+        <meta name = 'robots' content = 'index, follow'>
+
+        <link rel = 'stylesheet' href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css'>
+        <link rel = 'stylesheet' href='https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css'>
+        <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Magnolia+Script&display=swap" rel="stylesheet">
+
+        
+        <!-- TailwindCSS Compilation -->
+        <link rel="stylesheet" href="{% static 'src/styles.css' %}">
+        <link rel="stylesheet" href="{% static 'style.css' %}">
+        
+        <title> {{ title }}</title>
+    </head>
+
+    <body>
+        <div class="container mx-auto px-6 py-10">
+            <h1 class="text-4xl font-bold text-center text-gray-800 mb-8">{{ title }}</h1>
+
+            {% if form.errors %}
+                <div class="text-center text-red-500 font-bold p-3 rounded-md">
+                    <ul>
+                        {% for field in form %}
+                            {% for error in field.errors %}
+                                <li>{{ field.label }}: {{ error }}</li>
+                            {% endfor %}
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+    
+            <!-- Main Form Section -->
+            <div class="bg-white shadow-lg rounded-lg overflow-hidden max-w-5xl mx-auto p-6 md:p-8">
+                <div class="text-center mb-8">
+                    <h2 class="text-3xl font-bold text-gray-800 mb-2">Talk to a Healthcare Expert</h2>
+                    <p class="text-md text-gray-700">Fill out the form below and we’ll get back to you within 24 hours. Let’s address your health concerns with care.</p>
+                </div>
+    
+                <!-- Contact Details & Form -->
+                <div class="flex flex-col lg:flex-row justify-between gap-8">
+                    <!-- Contact Info Section -->
+                    <div class="bg-gray-800 text-white rounded-lg p-6 lg:w-1/2 mb-8 lg:mb-0">
+                        <p class="mb-6 text-lg">Our experts are here to assist you. Reach out through the following:</p>
+                        <p class="flex items-center mb-4"><i class="bi bi-telephone-fill mr-2"></i> +44 7706 538031</p>
+                        <p class="flex items-center mb-4"><i class="bi bi-envelope-fill mr-2"></i> Medix@gmail.com</p>
+                        <p class="flex items-center mb-4"><i class="bi bi-geo-alt-fill mr-2"></i> Abuja, Nigeria, Africa</p>
+                        <p class="flex items-center mb-6"><i class="bi bi-globe-americas mr-2"></i><a href="/" class="text-gray-300 hover:text-white">Medix Consultation</a></p>
+    
+                        <!-- Social Media Links -->
+                        <div class="flex space-x-4">
+                            <a href="#" class="text-white hover:text-gray-300"><i class="bi bi-facebook text-2xl"></i></a>
+                            <a href="#" class="text-white hover:text-gray-300"><i class="bi bi-twitter-x text-2xl"></i></a>
+                            <a href="#" class="text-white hover:text-gray-300"><i class="bi bi-instagram text-2xl"></i></a>
+                        </div>
+                    </div>
+    
+                    <!-- Form Section -->
+                    <div class="lg:w-1/2 bg-white p-6 rounded-lg shadow-md">
+                        <form method="POST" novalidate class="space-y-6">
+                            {% csrf_token %}
+                            
+                            <!-- Name Field -->
+                            <div>
+                                <label class="block text-lg font-medium text-gray-800">Full Name</label>
+                                {{ form.name|add_class:'mt-1 block w-full border border-gray-300 text-gray-800 rounded-md p-3 outline-none' }}
+                            </div>
+    
+                            <!-- Email Field -->
+                            <div>
+                                <label class="block text-lg font-medium text-gray-800">Email Address</label>
+                                {{ form.email|add_class:'mt-1 block w-full border border-gray-300 text-gray-800 rounded-md p-3 outline-none' }}
+                            </div>
+    
+                            <!-- Phone Number Field -->
+                            <div>
+                                <label class="block text-lg font-medium text-gray-800">Phone Number</label>
+                                {{ form.phone|add_class:'mt-1 block w-full border border-gray-300 text-gray-800 rounded-md p-3 outline-none' |attr:'placeholder:Begin with a country code' }}
+                            </div>
+    
+                            <!-- Symptom Description Field -->
+                            <div>
+                                <label class="block text-lg font-medium text-gray-800">Describe Your Symptoms</label>
+                                {{ form.symptom|add_class:'mt-1 block w-full border border-gray-300 text-gray-800 rounded-md p-3 outline-none' }}
+                            </div>
+    
+                            <!-- Symptom Onset Field -->
+                            <div>
+                                <label class="block text-lg font-medium text-gray-800">Symptom Onset</label>
+                                {{ form.onset|add_class:'mt-1 block w-full border border-gray-300 text-gray-800 rounded-md p-3 outline-none' }}
+                            </div>
+    
+                            <!-- Duration of Symptoms Field -->
+                            <div>
+                                <label class="block text-lg font-medium text-gray-800">How Long Have You Had These Symptoms?</label>
+                                {{ form.duration|add_class:'mt-1 block w-full border border-gray-300 text-gray-800 rounded-md p-3 outline-none' }}
+                            </div>
+
+                            <!-- Worse Factors Field -->
+                            <div>
+                                <label class="block text-lg font-medium text-gray-800">Things That Make It Worse</label>
+                                {{ form.worse_factors|add_class:'mt-1 block w-full border border-gray-300 text-gray-800 rounded-md p-3 outline-none' }}
+                            </div>
+    
+                            <!-- Better Factors Field -->
+                            <div>
+                                <label class="block text-lg font-medium text-gray-800">Things That Make It Better</label>
+                                {{ form.better_factors|add_class:'mt-1 block w-full border border-gray-300 text-gray-800 rounded-md p-3 outline-none' }}
+                            </div>
+    
+                            <!-- Symptom Pattern Field -->
+                            <div>
+                                <label class="block text-lg font-medium text-gray-800">Symptom Pattern</label>
+                                {{ form.pattern|add_class:'mt-1 block w-full border border-gray-300 text-gray-800 rounded-md p-3 outline-none' }}
+                            </div>
+    
+                            <!-- Possible Cause Field -->
+                            <div>
+                                <label class="block text-lg font-medium text-gray-800">Any Idea What Could Be Causing It?</label>
+                                {{ form.possible_cause|add_class:'mt-1 block w-full border border-gray-300 text-gray-800 rounded-md p-3 outline-none' }}
+                            </div>
+    
+                            <!-- Concerns Field -->
+                            <div>
+                                <label class="block text-lg font-medium text-gray-800">Any Specific Concerns About The Symptoms?</label>
+                                {{ form.concerns|add_class:'mt-1 block w-full border border-gray-300 text-gray-800 rounded-md p-3 outline-none' }}
+                            </div>
+    
+                            <!-- Doctor's Expectation Field -->
+                            <div>
+                                <label class="block text-lg font-medium text-gray-800">What Expectations Do You Have for Your Doctor?</label>
+                                {{ form.doctor_expectation|add_class:'mt-1 block w-full border border-gray-300 text-gray-800 rounded-md p-3 outline-none' }}
+                            </div>
+    
+                            <!-- Medication Allergy Field -->
+                            <div>
+                                <label class="block text-lg font-medium text-gray-800">Do You Have Any Medication Allergy?</label>
+                                {{ form.medication_allergy|add_class:'mt-1 block w-full border border-gray-300 text-gray-800 rounded-md p-3 outline-none' }}
+                            </div>
+    
+                            <!-- Submit Button -->
+                            <div class="text-center">
+                                <button type="submit" class="bg-gray-800 text-white font-semibold py-3 px-6 rounded-lg transition duration-200 hover:bg-gray-700">
+                                    Submit Consultation Request
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    
+        <!-- Footer Section -->
+        <footer class="text-center py-4 mt-4 text-gray-800">
+            <p class="text-sm">&copy; Medix {% now 'Y' %} | All Rights Reserved</p>
+        </footer>
+
+    </body>
+</html>

@@ -1,0 +1,53 @@
+{% load static %}
+{% load widget_tweaks %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset='utf-8'>
+        <meta http-equiv = 'X-UA-Compatible' content = 'IE=edge'>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv='content-type' content='text/html; charset = utf-8'/>
+        <meta name = 'robots' content = 'index, follow'>
+
+        <link rel = 'stylesheet' href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css'>
+        <link rel = 'stylesheet' href='https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css'>
+        <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Magnolia+Script&display=swap" rel="stylesheet">
+
+        
+        <!-- TailwindCSS Compilation -->
+        <link rel="stylesheet" href="{% static 'src/styles.css' %}">
+        <link rel="stylesheet" href="{% static 'style.css' %}">
+        
+        <title> {{ title }}</title>
+    </head>
+
+    <body>
+        <div class="container mx-auto p-6">
+            <h1 class="text-3xl font-semibold mb-6">{{ title }}</h1>
+            
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h2 class="text-xl font-semibold">Health Submission Details</h2>
+                <p><strong>Name:</strong> {{ health.name }}</p>
+                <p><strong>Email:</strong> {{ health.email }}</p>
+                <p><strong>Phone:</strong> {{ health.phone }}</p>
+                <p><strong>Message:</strong> {{ health.message }}</p>
+        
+                <form method="POST" class="mt-6">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+        
+                    <div class="mt-4">
+                        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                            Reply to User
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <footer>
+
+        </footer>
+    </body>
+</html>
