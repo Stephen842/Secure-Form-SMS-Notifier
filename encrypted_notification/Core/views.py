@@ -1,9 +1,10 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.core.mail import send_mail
+from django.core.mail import send_mail, EmailMessage
 from django.conf import settings
 from django.http import HttpResponse
 from django.urls import reverse
 from django.contrib import messages
+from datetime import datetime
 from twilio.rest import Client
 from .models import Health, Reply
 from .forms import HealthForm, AdminReplyForm, UserReplyForm
@@ -45,25 +46,26 @@ def health_form(request):
         #send_sms(ADMIN_PHONE_NUMBER, sms_body)
 
         # Send Email to Admin
-        send_mail(
+        email = EmailMessage(
             subject = 'New Health Form Submitted',
-            message=f"""Hello Dr,
+            body=f"""
+            <p>Hello Dr,</p>
 
-            A new health form has been submitted by a user.
+            <p>A new health form has been submitted by a user.</p>
 
-            To review the details and respond, please access the dashboard using the link below:
+            <p>To review the details and respond, please click the link below:</p>
 
-            {url}
+            <p><a href="{url}" style="color: blue;">Click here to view</a></p>
 
-            This notification is sent from Medix(I used the name 'Medix' just for testing), ensuring secure and efficient communication.
+            <p>This notification is sent from <strong>Medix</strong>, ensuring secure and efficient communication.</p>
 
-            Best regards,  
-            Medix Team  
+            <p>Best regards, <br> Medix Team</p>
             """,
             from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[settings.EMAIL_HOST_USER],
-            fail_silently=False,
+            to=[settings.EMAIL_HOST_USER],
         )
+        email.content_subtype = "html"  # Important for HTML formatting
+        email.send()
 
         messages.success(request, 'Form submitted successfully. Our expert will reach out to you via email and SMS to continue the process. Thank you!')
         return redirect('success_url')  # Redirect to a success page
@@ -84,7 +86,34 @@ def dashboard(request, token):
     health_instance.access_attempts -= 1
     health_instance.save()
 
+    # To fetch forms and messages submitted
+    health_forms = Health.objects.order_by('-submitted_at')[:5]
+    messages_list = Reply.objects.order_by('-created_at')[:10]
+
+    # Greeetings 
+    current_hour = datetime.now().hour
+    if current_hour < 12:
+        greeting = "Good morning"
+    elif current_hour < 16:
+        greeting = "Good afternoon"
+    else:
+        greeting = "Good evening"
+
+    context = {
+        'health_forms': health_forms,
+        'messages_list': messages_list,
+        'token': token,
+        'greeting': greeting,
+        'title': 'Admin Panel | Medix System',
+    }
+
+    return render(request, 'pages/dashboard.html', context)
+
+# This function allows the admin to view a form and also to send reply.
+def form_details(request, form_id):
+    health_instance = get_object_or_404(Health, id=form_id)
     form = AdminReplyForm(request.POST or None, request.FILES or None)  # Handle file uploads)
+
     if request.method == 'POST' and form.is_valid():
         reply = form.save(commit=False)
         reply.health = health_instance
@@ -105,42 +134,155 @@ def dashboard(request, token):
         #send_sms(health_instance.phone, sms_body)
 
         # Send Email
-        send_mail(
+        email = EmailMessage(
             subject='Important: Response to Your Medical Inquiry',
-            message=f"""Hi Dear,
+            body=f"""
+            <p>Hi {health_instance.name},</p>
 
-            We have reviewed your submitted health inquiry, and an official response has been provided.  
+            <p>We have reviewed your submitted health inquiry, and an official response has been provided.</p>
 
-            For detailed information, kindly click the link below to view the response securely:  
+            <p>For detailed information, kindly click the link below to view the response securely:</p>
 
-            {reply_url}
+            <p><a href="{reply_url}" style="color: blue;">Click here to view</a></p>
 
-            Please note that this message was sent from Medix, a secure platform for medical-related inquiries.  
+            <p>Please note that this message was sent from Medix, a secure platform for medical-related inquiries.</p> 
 
-            If you have further questions, you may respond via the provided portal.  
+            <p>If you have further questions, you may respond via the provided portal.</p>
 
-            Stay safe and take care!  
+            <p>Stay safe and take care!</p>
 
-            Best regards,  
-            Medix Team  
+            <p>Best regards,</p>
+            <p><strong> Medix Team </strong></p>
             """,
             from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[health_instance.email],
+            to=[health_instance.email],
         )
+        email.content_subtype = "html"  # Important for HTML formatting
+        email.send()
 
         messages.success(request, 'Reply sent successfully!')
 
     context = {
         'health': health_instance,
         'form': form,
-        'title': 'Admin Panel | Medix System',
+        'title': 'Health Form Details',
     }
 
-    return render(request, 'pages/dashboard.html', context)
+    return render(request, 'pages/admin_form_details.html', context)
+
+# This function is to view all messages between admin and users
+def all_submisions(request):
+    submission_list = Health.objects.order_by('-submitted_at')
+
+    # Greeetings 
+    current_hour = datetime.now().hour
+    if current_hour < 12:
+        greeting = "Good morning"
+    elif current_hour < 16:
+        greeting = "Good afternoon"
+    else:
+        greeting = "Good evening"
+
+    context = {
+        'submission_list': submission_list,
+        'greeting': greeting,
+        'title': 'Submissions',
+    }
+
+    return render(request, 'pages/all_submission.html', context)
+
+# This function is to view all messages between admin and users
+def all_messages(request):
+    messages_list = Reply.objects.order_by('-created_at')
+
+    # Greeetings 
+    current_hour = datetime.now().hour
+    if current_hour < 12:
+        greeting = "Good morning"
+    elif current_hour < 16:
+        greeting = "Good afternoon"
+    else:
+        greeting = "Good evening"
+
+    context = {
+        'messages_list': messages_list,
+        'greeting': greeting,
+        'title': 'Messages',
+    }
+
+    return render(request, 'pages/all_messages.html', context)
+
+# This function allows admin to view and reply users messages via the encrypted URL
+def Admin_message_view(request, thread_id):
+    reply_instance = get_object_or_404(Reply, id=thread_id) 
+
+    form = AdminReplyForm(request.POST or None, request.FILES or None)  # Handle file uploads
+
+    if request.method == 'POST' and form.is_valid():
+        admin_reply = form.save(commit=False)
+        admin_reply.health = reply_instance.health
+        admin_reply.parent_reply = reply_instance
+        admin_reply.sender_type = 'admin'
+        admin_reply.generate_encrypted_reply_url()
+        admin_reply.save()
+
+        # Notify User via SMS and Email
+        reply_url = request.build_absolute_uri(reverse('messages', args=[admin_reply.encrypted_reply_url]))
+
+        # Send SMS
+        #sms_body = (
+        #    "Important: New reply from Medix.\n\n"
+        #    "Our team has responded to your message.\n"
+        #    "Click the link below to securely view the response:\n\n"
+        #    f"🔗 {reply_url}\n\n"
+        #    "This message is securely sent from Medix."
+        #)
+        #send_sms(reply_instance.health.phone, sms_body)
+
+        # Send Email
+        email = EmailMessage(
+            subject='Important: New reply from Medix.',
+            body=f"""
+            <p> Hi {reply_instance.health.name}, </p>
+
+            <p> Our team has responded to your message. </p>
+
+            <p> Click below to view securely: </p>
+
+            <p><a href="{reply_url}" style="color: blue;">Click here to view</a></p>
+
+            <p> Please note that this message was sent from Medix, a secure platform for medical-related inquiries. </p>
+
+            <p> If you have further questions, you may respond via the provided portal. </p>
+
+            <p> Stay safe and take care! </p> 
+
+            <p> Best regards, </p> 
+            <p><strong> Medix Team </strong></p>
+            """,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            to=[reply_instance.health.email],
+        )
+        email.content_subtype = "html"  # Important for HTML formatting
+        email.send()
+        
+        messages.success(request, 'Reply sent successfully!')
+
+    # Ensure chat history is ordered correctly
+    chat_history = Reply.objects.filter(health=reply_instance.health).order_by('created_at')
+
+    context = {
+        'reply': reply_instance,
+        'form': form,
+        'chat_history': chat_history,
+        'title': 'Medix Direct Messaging: Connect with Our Experts'
+    }
+
+    return render(request, 'pages/message.html', context)
 
 
 # This function allows user to view and reply admin messages via the encrypted URL.
-def message_view(request, token):
+def user_message_view(request, token):
     reply = get_object_or_404(Reply, encrypted_reply_url=token)
     health_instance = reply.health # To get the related health form
 
@@ -173,24 +315,27 @@ def message_view(request, token):
         #send_sms(ADMIN_PHONE_NUMBER, sms_body)
 
         # Send Email
-        send_mail(
+        email = EmailMessage(
             subject='User Responded to Your Message',
-            message=f"""Hello Dr,
+            body=f"""
+            <p>Hello Dr,</p>
 
-            A user has replied to your message.
+            <p>A user has replied to your message.</p>
 
-            To review the response and provide further assistance, please click the link below:  
+            <p>To review the response and provide further assistance, please click the link below:</p>
 
-            {admin_reply_url}
+            <p><a href="{admin_reply_url}" style="color: blue;">Click here to view</a></p>
 
-            This message is securely sent from Medix to ensure seamless communication.  
+            <p>This message is securely sent from Medix to ensure seamless communication.</p>  
 
-            Best regards,  
-            Medix Team
+            <p>Best regards,</p> 
+            <p><strong>Medix Team</strong></p>
             """,
             from_email=settings.DEFAULT_FROM_EMAIL,
             recipient_list=[settings.EMAIL_HOST_USER],
         )
+        email.content_subtype = "html"  # Important for HTML formatting
+        email.send()
 
         messages.success(request, 'Reply sent successfully!')
 

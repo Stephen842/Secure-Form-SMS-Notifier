@@ -1,0 +1,16 @@
+/* For webkit browsers (Chrome, Edge, Safari) */
+.scrollbar::-webkit-scrollbar,
+::-webkit-scrollbar {
+    display: none;
+}
+
+/* For Firefox */
+html, .scrollbar {
+    scrollbar-width: none; /* Hides the scrollbar */
+}
+
+/* General overflow settings */
+body, .scrollbar {
+    overflow: -moz-scrollbars-none; /* Fallback for old browsers */
+    overflow-y: scroll; /* Ensure content can scroll without a visible bar */
+}
