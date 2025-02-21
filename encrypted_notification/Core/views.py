@@ -5,6 +5,7 @@ from django.http import HttpResponse
 from django.urls import reverse
 from django.contrib import messages
 from datetime import datetime
+import random
 from twilio.rest import Client
 from .models import Health, Reply
 from .forms import HealthForm, AdminReplyForm, UserReplyForm
@@ -93,11 +94,11 @@ def dashboard(request, token):
     # Greeetings 
     current_hour = datetime.now().hour
     if current_hour < 12:
-        greeting = "Good morning"
+        greeting = "Good Morning"
     elif current_hour < 16:
-        greeting = "Good afternoon"
+        greeting = "Good Afternoon"
     else:
-        greeting = "Good evening"
+        greeting = "Good Evening"
 
     context = {
         'health_forms': health_forms,
@@ -107,7 +108,62 @@ def dashboard(request, token):
         'title': 'Admin Panel | Medix System',
     }
 
-    return render(request, 'pages/dashboard.html', context)
+    return render(request, 'pages/admin_dashboard.html', context)
+
+
+# This function is to view all messages between admin and users
+def all_submisions(request):
+    submission_list = Health.objects.order_by('-submitted_at')
+
+    # Randomly retrieves dashboard token to ensure the dashboard remains accessible from any page.
+    health_records = Health.objects.all()
+    random_health = random.choice(health_records)
+    token = random_health.encrypted_url    
+
+    # Greeetings 
+    current_hour = datetime.now().hour
+    if current_hour < 12:
+        greeting = "Good Morning"
+    elif current_hour < 16:
+        greeting = "Good Afternoon"
+    else:
+        greeting = "Good Evening"
+
+    context = {
+        'submission_list': submission_list,
+        'token': token,
+        'greeting': greeting,
+        'title': 'Admin Panel | Submissions',
+    }
+
+    return render(request, 'pages/admin_all_submission.html', context)
+
+# This function is to view all messages between admin and users
+def all_messages(request):
+    messages_list = Reply.objects.order_by('-created_at')
+
+    # Randomly retrieves dashboard token to ensure the dashboard remains accessible from any page.
+    health_records = Health.objects.all()
+    random_health = random.choice(health_records)
+    token = random_health.encrypted_url
+
+    # Greeetings 
+    current_hour = datetime.now().hour
+    if current_hour < 12:
+        greeting = "Good Morning"
+    elif current_hour < 16:
+        greeting = "Good Afternoon"
+    else:
+        greeting = "Good Evening"
+
+    context = {
+        'messages_list': messages_list,
+        'token': token,
+        'greeting': greeting,
+        'title': 'Admin Panel | Messages',
+    }
+
+    return render(request, 'pages/admin_all_messages.html', context)
 
 # This function allows the admin to view a form and also to send reply.
 def form_details(request, form_id):
@@ -162,58 +218,32 @@ def form_details(request, form_id):
 
         messages.success(request, 'Reply sent successfully!')
 
+    # Randomly retrieves dashboard token to ensure the dashboard remains accessible from any page.
+    health_records = Health.objects.all()
+    random_health = random.choice(health_records)
+    token = random_health.encrypted_url
+
+    # Greeetings 
+    current_hour = datetime.now().hour
+    if current_hour < 12:
+        greeting = "Good Morning"
+    elif current_hour < 16:
+        greeting = "Good Afternoon"
+    else:
+        greeting = "Good Evening"
+
     context = {
         'health': health_instance,
         'form': form,
-        'title': 'Health Form Details',
+        'token': token,
+        'greeting': greeting,
+        'title': 'Admin Panel | Health Form Details',
     }
 
     return render(request, 'pages/admin_form_details.html', context)
 
-# This function is to view all messages between admin and users
-def all_submisions(request):
-    submission_list = Health.objects.order_by('-submitted_at')
-
-    # Greeetings 
-    current_hour = datetime.now().hour
-    if current_hour < 12:
-        greeting = "Good morning"
-    elif current_hour < 16:
-        greeting = "Good afternoon"
-    else:
-        greeting = "Good evening"
-
-    context = {
-        'submission_list': submission_list,
-        'greeting': greeting,
-        'title': 'Submissions',
-    }
-
-    return render(request, 'pages/all_submission.html', context)
-
-# This function is to view all messages between admin and users
-def all_messages(request):
-    messages_list = Reply.objects.order_by('-created_at')
-
-    # Greeetings 
-    current_hour = datetime.now().hour
-    if current_hour < 12:
-        greeting = "Good morning"
-    elif current_hour < 16:
-        greeting = "Good afternoon"
-    else:
-        greeting = "Good evening"
-
-    context = {
-        'messages_list': messages_list,
-        'greeting': greeting,
-        'title': 'Messages',
-    }
-
-    return render(request, 'pages/all_messages.html', context)
-
 # This function allows admin to view and reply users messages via the encrypted URL
-def Admin_message_view(request, thread_id):
+def admin_message_view(request, thread_id):
     reply_instance = get_object_or_404(Reply, id=thread_id) 
 
     form = AdminReplyForm(request.POST or None, request.FILES or None)  # Handle file uploads
@@ -271,14 +301,20 @@ def Admin_message_view(request, thread_id):
     # Ensure chat history is ordered correctly
     chat_history = Reply.objects.filter(health=reply_instance.health).order_by('created_at')
 
+    # Randomly retrieves dashboard token to ensure the dashboard remains accessible from any page.
+    health_records = Health.objects.all()
+    random_health = random.choice(health_records)
+    token = random_health.encrypted_url
+
     context = {
         'reply': reply_instance,
         'form': form,
         'chat_history': chat_history,
+        'token': token,
         'title': 'Medix Direct Messaging: Connect with Our Experts'
     }
 
-    return render(request, 'pages/message.html', context)
+    return render(request, 'pages/admin_messaging.html', context)
 
 
 # This function allows user to view and reply admin messages via the encrypted URL.
@@ -332,7 +368,7 @@ def user_message_view(request, token):
             <p><strong>Medix Team</strong></p>
             """,
             from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[settings.EMAIL_HOST_USER],
+            to=[settings.EMAIL_HOST_USER],
         )
         email.content_subtype = "html"  # Important for HTML formatting
         email.send()

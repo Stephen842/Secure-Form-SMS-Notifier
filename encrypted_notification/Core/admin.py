@@ -4,13 +4,13 @@ from .models import Health, Reply
 
 # Register your models here.
 class HealthAdmin(admin.ModelAdmin):
-    list_display = ('name', 'submitted_at')
+    list_display = ('id', 'name', 'submitted_at')
     search_fields = ('name',)
 
     pass
 
 class ReplyAdmin(admin.ModelAdmin):
-    list_display = ('message',)
+    list_display = ('id', 'message',)
 
     pass
 

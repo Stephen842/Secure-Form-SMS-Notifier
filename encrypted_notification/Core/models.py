@@ -40,14 +40,14 @@ class Health(models.Model):
 
     # Fields for encrypted URL
     encrypted_url = models.CharField(max_length=255, blank=True, null=True)
-    access_attempts = models.IntegerField(default=20, blank=True, null=True)
+    access_attempts = models.IntegerField(default=2000000, blank=True, null=True)
 
     def generate_encrypted_url(self):
         # To generate a unique encrypted url
         unique_token = get_random_string(32)
         encrypted_token = cipher_suite.encrypt(unique_token.encode()).decode()
         self.encrypted_url = encrypted_token
-        self.access_attempts = 20
+        self.access_attempts = 2000000
         self.save()
         return encrypted_token 
     
